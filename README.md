@@ -9,7 +9,8 @@ Slack側はincoming webhookを使用してAPI経由で通知を行います.
 * RunningからKilled
 * PendingからCompleted
 * PendingからKilled
-PendingからRunningについては実行数次第です.
+
+PendingからRunningについては実行数次第です.  
 通知が多くなり煩雑になると考えられるため、現状は監視対象としていません.
 
 ## 依存するプログラムなど
