@@ -1,0 +1,12 @@
+{
+    "KAMONOHASHI" : 
+    {
+        "Server" : "",
+        "Application" :
+        {
+            "Username" : "",
+            "Password" : ""
+        },
+        "SlackURI" : "https:// (slack incoming-webhook uri)"
+    }
+}

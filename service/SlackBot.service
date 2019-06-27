@@ -1,0 +1,16 @@
+[Unit]
+Description = Kamonohashi SlackBot
+Documentation = https://github.com/sinpcw/kamonohashi-slackbot.git
+
+[Service]
+ExecStart = /usr/bin/python3 /home/(username)/kamonohashi-slackbot/main.py --config_root=/home/(username)/kamonohashi-slackbot/config
+Restart = always
+Type = simple
+User = (username)
+Group = (usergroup)
+WorkingDirectory = /home/(username)/kamonohashi-slackbot/
+EnvironmentFile = /etc/sysconfig/SlackBotConfig
+
+[Install]
+WantedBy = multi-user.target
+

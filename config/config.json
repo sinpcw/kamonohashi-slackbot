@@ -1,0 +1,49 @@
+{
+    "Watch" : 
+    {
+        "Default":
+        {
+            "Active" : false,
+            "Tenant" : [ (TenantIDs) ],
+            "Enter" : 9,
+            "Leave" : 17
+        },
+        "Monday" :
+        {
+            "Active" : true,
+            "Enter" : 10,
+            "Leave" : 21
+        },
+        "Tuesday" :
+        {
+            "Active" : true,
+            "Enter" : 9,
+            "Leave" : 21
+        },
+        "Wednesday" :
+        {
+            "Active" : true,
+            "Enter" : 9,
+            "Leave" : 21
+        },
+        "Thursday" :
+        {
+            "Active" : true,
+            "Enter" : 9,
+            "Leave" : 21
+        },
+        "Friday" :
+        {
+            "Active" : true,
+            "Enter" : 9,
+            "Leave" : 18
+        }
+    },
+    "Tenant" :
+    {
+        (TenantID) : {
+            "ByName" : [ (SlackUserName) ]
+        }
+    },
+    "Polling" : 10
+}

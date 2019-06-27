@@ -1,0 +1,3 @@
+PATH=/home/(username)/.local/bin
+RUN_DIR=/home/(username)/kamonohashi-slackbot
+
