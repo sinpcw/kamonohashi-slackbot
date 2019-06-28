@@ -164,6 +164,8 @@ def main(argv):
                 msg.SendMessage(msg.CreateTenantsRunningInfo(tenants, tenant_status['count']))
             # 連続で処理すると負荷がかかるため、指定したポーリング間隔で待機
             time.sleep(cfg['Polling'])
+        # 日の処理完了を抜けた場合はリセットする
+        watch_status['dailyjob'] = False
 
 if __name__ == '__main__':
     flags.mark_flag_as_required('config_root')
