@@ -9,13 +9,15 @@ Slack側はincoming webhookを使用してAPI経由で通知を行います.
 * RunningからKilled
 * PendingからCompleted
 * PendingからKilled
-PendingからRunningについては実行数次第です.
+
+PendingからRunningについては実行数次第です.  
 通知が多くなり煩雑になると考えられるため、現状は監視対象としていません.
 
 ## 依存するプログラムなど
 * curl
 * python3
 * python3-pip
+* slack (incoming-webhook)
 
 ## 環境設定
 
@@ -60,9 +62,12 @@ config.jsonを開き設定を行います.
 secure.jsonを開き設定を行います.  
 ServerはKAMONOHASHIのURIを指定します.  
 Application項のUsername, PasswordはKAMONOHASHIにアクセスするユーザーの認証情報を指定します.  
-通常はリソース監視だけができるアカウントを作成する.
+  
+通常はリソース監視だけができるアカウントを作成する.  
 そのアカウントは監視専用で使用するという運用が望ましいと思います.  
-またSlackURIには incoming-webhook のAPI URIを指定します.  
+  
+またSlackURIにはincoming-webhook(SlackApp)のURIを指定します.  
+あらかじめincoming-webhookが利用できる状態にしておく必要があります.  
 ```
 {
     "KAMONOHASHI" : 
