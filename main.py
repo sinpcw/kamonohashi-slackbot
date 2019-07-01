@@ -49,18 +49,19 @@ def UpdateWatchStatus(status, condition, message):
                 msg = message.GetSystemMessage('Leave.' + WeekDayString[wday])
             else:
                 msg = message.GetSystemMessage('Leave')
-    message.SendSystemMessage(msg)
+        if msg is not None:
+            message.SendSystemMessage(msg)
     return status
 
-def UpdateTenantTrainStatus(tenant_status, tenant_condition, tenant, watch_status, message, kqi):
-    return UpdateTenantStatus(tenant_status, tenant_condition, tenant, watch_status, message, kqi, 'Train')
+def UpdateTenantTrainStatus(tenant_status, tenant_condition, tenant, tenants, watch_status, message, kqi):
+    return UpdateTenantStatus(tenant_status, tenant_condition, tenant, tenants, watch_status, message, kqi, 'Train')
 
-def UpdateTenantInferStatus(tenant_status, tenant_condition, tenant, watch_status, message, kqi):
-    return UpdateTenantStatus(tenant_status, tenant_condition, tenant, watch_status, message, kqi, 'Infer')
+def UpdateTenantInferStatus(tenant_status, tenant_condition, tenant, tenants, watch_status, message, kqi):
+    return UpdateTenantStatus(tenant_status, tenant_condition, tenant, tenants, watch_status, message, kqi, 'Infer')
 
-def UpdateTenantStatus(tenant_status, tenant_condition, tenant, watch_status, message, kqi, state):
+def UpdateTenantStatus(tenant_status, tenant_condition, tenant, tenants, watch_status, message, kqi, state):
     tenant_name = str(tenant) + '.' + state
-    if not watch_status['watching'] or not tenant_name in tenant_status:
+    if not watch_status['watching'] or not tenant_name in tenant_status['state']:
         tenant_status['state'][tenant_name] = kqi.GetTrainJobsStatus() if state == 'Train' else kqi.GetInferJobsStatus()
         return tenant_status
     # ジョブ状況収集対象
@@ -75,7 +76,7 @@ def UpdateTenantStatus(tenant_status, tenant_condition, tenant, watch_status, me
     #   Running -> UserCanceled
     old_status = tenant_status['state'][tenant_name]
     now_status = kqi.GetTrainJobsStatus() if state == 'Train' else kqi.GetInferJobsStatus()
-    for job in status:
+    for job in now_status.keys():
         # テナントの実行ジョブ数に加算:
         if now_status[job]['status'] == 'Running':
             tenant_status['count'][tenant] = tenant_status['count'][tenant] + 1 if tenant in tenant_status['count'] else 1
@@ -86,7 +87,7 @@ def UpdateTenantStatus(tenant_status, tenant_condition, tenant, watch_status, me
                 # 現在: 実行中
                 # 通知がおおくなりそうなのでとりあえずいまは実装していない
                 pass
-            elif now_status[jobid]['status'] in [ 'Completed', 'Killed', 'UserCanceled' ]:
+            elif now_status[job]['status'] in [ 'Completed', 'Killed', 'UserCanceled' ]:
                 # 現在: 完了/キル/ユーザーキャンセル
                 # ポーリングよりもジョブが終わるほうが早いケースはないと考えられるので実装していない
                 pass
@@ -97,13 +98,13 @@ def UpdateTenantStatus(tenant_status, tenant_condition, tenant, watch_status, me
                 # 現在: 実行中
                 # 通知がおおくなりそうなのでとりあえずいまは実装していない
                 pass
-            elif old_status[job]['status'] == 'Running' and now_status[job]['status'] != 'Running':
-                # 過去: 実行中
+            elif old_status[job]['status'] in [ 'Pending', 'Running' ] and now_status[job]['status'] in [ 'Completed', 'Killed', 'UserCanceled' ]
+                # 過去: 待機中/実行中
                 # 現在: 完了/キル/ユーザーキャンセル
                 if 'ByName' in tenant_condition and len(tenant_condition['ByName']) > 0:
-                    message.SendMessage(message.CreateMessageTo(tenant, job, state[job]['status'], tenant_condition['ByName']))
+                    message.SendMessage(message.CreateMessageTo(tenants[tenant], job, now_status[job]['status'], tenant_condition['ByName']))
                 else:
-                    message.SendMessage(message.CreateMessage(tenant, job, state[job]['status']))
+                    message.SendMessage(message.CreateMessage(tenants[tenant], job, now_status[job]['status']))
     # ステータス更新
     tenant_status['state'][tenant_name] = status
     return tenant_status
@@ -148,6 +149,8 @@ def main(argv):
             cfg.Load()
             # 監視状態更新
             watch_status = UpdateWatchStatus(watch_status, GetWatchCondition(cfg), msg)
+            # 監視状態変数のクリア
+            tenant_status['count'] = {}
             # 監視状態がアクティブの場合はテナント毎に監視処理を行う
             for tenant in tenants:
                 tenant_condition = {}
@@ -155,17 +158,19 @@ def main(argv):
                     tenant_condition = cfg['Tenant'][str(tenant)]
                 kqi.SwitchTenant(tenant)
                 # 監視状態かどうか
-                tenant_status = UpdateTenantTrainStatus(tenant_status, tenant_condition, tenant, watch_status, msg, kqi)
-                tenant_status = UpdateTenantInferStatus(tenant_status, tenant_condition, tenant, watch_status, msg, kqi)
+                tenant_status = UpdateTenantTrainStatus(tenant_status, tenant_condition, tenant, tenants, watch_status, msg, kqi)
+                tenant_status = UpdateTenantInferStatus(tenant_status, tenant_condition, tenant, tenants, watch_status, msg, kqi)
             # サーバーヘルス監視(特に監視したいのはGPU温度)
             # T.B.D
             # すべての監視対象テナントでしばらくメッセージ送信していない場合は実行中に応じてメッセージを投げる
             if watch_status['watching'] and msg.IsPassedTime(seconds=120 * 60):
                 msg.SendMessage(msg.CreateTenantsRunningInfo(tenants, tenant_status['count']))
+                msg.UpdateTimestamp()
             # 連続で処理すると負荷がかかるため、指定したポーリング間隔で待機
             time.sleep(cfg['Polling'])
         # 日の処理完了を抜けた場合はリセットする
         watch_status['dailyjob'] = False
+        watch_status['waketime'] = datetime.now()
 
 if __name__ == '__main__':
     flags.mark_flag_as_required('config_root')
