@@ -145,8 +145,11 @@ def main(argv):
         tenants = kqi.GetTenantDict()
         print('Daily Loop Start')
         while datetime.now().day == watch_status['waketime'].day:
+            # JSONファイルの更新確認
             msg.Load()
-            cfg.Load()
+            if cfg.Load():
+                # 設定ファイルの更新があればテナント情報も再取得する
+                tenants = kqi.GetTenantDict()
             # 監視状態更新
             watch_status = UpdateWatchStatus(watch_status, GetWatchCondition(cfg), msg)
             # 監視状態変数のクリア

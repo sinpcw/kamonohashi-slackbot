@@ -19,7 +19,8 @@ class JsonManager(object):
     def Load(self):
         date = os.path.getctime(self.filepath)
         if self.readtime == date:
-            return
+            return False
         with open(self.filepath, 'r') as f:
             self.dictdata = json.load(f)
         self.readtime = date
+        return True
