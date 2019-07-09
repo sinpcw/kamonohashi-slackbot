@@ -45,8 +45,8 @@ def UpdateWatchStatus(status, condition, message):
             status['dailyjob'] = True
             if message.CountSendItem() == 0 and message.IsContainSystemMessage('Leave.Silent'):
                 msg = message.GetSystemMessage('Leave.Silent')
-            elif message.IsContainSystemMessage('Leave.' + WeekDayString[wday]):
-                msg = message.GetSystemMessage('Leave.' + WeekDayString[wday])
+            elif message.IsContainSystemMessage('Leave.' + Constant.WeekDayString[wday]):
+                msg = message.GetSystemMessage('Leave.' + Constant.WeekDayString[wday])
             else:
                 msg = message.GetSystemMessage('Leave')
         if msg is not None:
