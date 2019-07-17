@@ -39,13 +39,9 @@ def GetTemparetureFromNvidiaSmi(message):
                 cpos = cpos + 1
     return ret
 
-def GetServerGPUTemparetures(hostname, username, userpass, workdir='./'):
-    cmd1 = [ 'sshpass', '-p', userpass, 'ssh', username + '@' + hostname, 'nvidia-smi > nvidia-smi-result.txt' ]
-    cmd2 = [ 'sshpass', '-p', userpass, 'scp', username + '@' + hostname + ':/home/' + username + '/nvidia-smi-result.txt', workdir + hostname + '.txt' ]
-    cmd3 = [ 'sshpass', '-p', userpass, 'ssh', username + '@' + hostname, 'rm nvidia-smi-result.txt' ]
-    ret = sp.run(cmd1, stdout=sp.PIPE)
-    ret = sp.run(cmd2, stdout=sp.PIPE)
-    ret = sp.run(cmd3, stdout=sp.PIPE)
-    with open(os.path.join(workdir, hostname + '.txt'), mode='r', encoding='utf-8') as f:
-        message = f.read().replace('\r\n', '\n').split('\n')
-    return GetTemparetureFromNvidiaSmi(message)
+def GetServerGPUTemparetures(hostname, username, userpass):
+    cmd = [ 'sshpass', '-p', userpass, 'ssh', username + '@' + hostname, 'nvidia-smi' ]
+    ret = sp.run(cmd, stdout=sp.PIPE)
+    msg = ret.stdout.decode().split('\n')
+    return GetTemparetureFromNvidiaSmi(msg)
+
