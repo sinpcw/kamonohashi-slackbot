@@ -91,7 +91,7 @@ class MessageManager(JsonManager):
             if DEBUG:
                 print('message : {}'.format(message))
             else:
-                out = sp.run(['/usr/bin/curl', '-X', 'POST', '-H', '\'Content-type: application/json\'', '--data', '{ \"text\" : \"' + message + '\" }', self.postmessage_uri ], stdout=sp.PIPE)
+                _ = sp.run(['/usr/bin/curl', '-X', 'POST', '-H', '\'Content-type: application/json\'', '--data', '{ \"text\" : \"' + message + '\" }', self.postmessage_uri ], stdout=sp.PIPE)
             self.sendtime = datetime.now()
             self.senditem = self.senditem + 1
 
@@ -100,7 +100,7 @@ class MessageManager(JsonManager):
             if DEBUG:
                 print('message : {}'.format(message))
             else:
-                out = sp.run(['/usr/bin/curl', '-X', 'POST', '-H', '\'Content-type: application/json\'', '--data', '{ \"text\" : \"' + message + '\" }', self.postmessage_uri ], stdout=sp.PIPE)
+                _ = sp.run(['/usr/bin/curl', '-X', 'POST', '-H', '\'Content-type: application/json\'', '--data', '{ \"text\" : \"' + message + '\" }', self.postmessage_uri ], stdout=sp.PIPE)
 
     def UpdateTimestamp(self):
         self.sendtime = datetime.now()

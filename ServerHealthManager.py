@@ -11,7 +11,6 @@ def GetTemparetureFromNvidiaSmi(message):
     vpos = 0
     cpos = 0
     spos = 0
-    val = None
     ret = []
     for i, line in enumerate(message):
         if not init:
